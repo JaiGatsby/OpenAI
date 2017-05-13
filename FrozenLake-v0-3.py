@@ -4,7 +4,7 @@ from gym import wrappers
 
 # Setting up the environment
 env = gym.make('FrozenLake-v0') # using FrozenLake for now as im having dependency issues and it is a discrete state system
-# env = wrappers.Monitor(env, '/tmp/frozenlake-experiment-1')
+env = wrappers.Monitor(env, '/tmp/frozenlake-experiment-4')
 
 print(env.action_space)
 #Discrete(4)
@@ -13,8 +13,8 @@ print(env.observation_space)
 
 qstates = np.zeros([env.observation_space.n,env.action_space.n]) # a 16x4 of zeros, each representing an action per state
 # eps = 0.2
-alpha = 0.85
-gamma = 0.9999
+alpha = 0.01
+gamma = 1
 
 num_episodes = 2500
 
@@ -32,12 +32,12 @@ for i_episode in range(num_episodes):
 		# print("reward", reward)
 		if done:
 			if reward != 0:
-				altReward = 20 # Goal
+				altReward = 1# Goal
 			else:
-				altReward = -5 # Dead
+				altReward = -2 # Dead
 		else:
-			altReward = -0.00001 #living reward
-		qstates[observation,action] = qstates[observation,action] + alpha*(altReward+(gamma*np.max(qstates[observation1,:])) - qstates[observation,action])
+			altReward = 0 #living reward
+		qstates[observation,action] = (1-alpha)*qstates[observation,action] + alpha*(altReward+(gamma*np.max(qstates[observation1,:])) - qstates[observation,action])
 		observation = observation1
 		rAll += reward
 		if done:
@@ -45,6 +45,6 @@ for i_episode in range(num_episodes):
 				# print("Episode finished after {} timesteps".format(t+1), "reward: ", rAll)
 			break
 	rList.append(rAll)
-
+env.close()
 print("Score over time:" + str(sum(rList)/num_episodes))
-# print("score over last 100: ", sum(rList[:-100])/100)
+print("score over last 100: ", sum(rList[-100:])/100)
