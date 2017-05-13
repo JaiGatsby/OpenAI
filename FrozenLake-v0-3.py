@@ -6,9 +6,9 @@ from gym import wrappers
 env = gym.make('FrozenLake-v0') # using FrozenLake for now as im having dependency issues and it is a discrete state system
 env = wrappers.Monitor(env, '/tmp/frozenlake-experiment-4')
 
-print(env.action_space)
+# print(env.action_space)
 #Discrete(4)
-print(env.observation_space)
+# print(env.observation_space)
 #Discrete(16)
 
 qstates = np.zeros([env.observation_space.n,env.action_space.n]) # a 16x4 of zeros, each representing an action per state
