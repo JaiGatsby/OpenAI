@@ -1,10 +1,11 @@
 import gym
 import numpy as np
 from gym import wrappers
+import pickle
 
 # Setting up the environment
-env = gym.make('FrozenLake-v0') # using FrozenLake for now as im having dependency issues and it is a discrete state system
-env = wrappers.Monitor(env, '/tmp/frozenlake-experiment-4')
+env = gym.make('FrozenLake-v0') # FrozenLake
+# env = wrappers.Monitor(env, '/tmp/frozenlake-experiment-4')
 
 # print(env.action_space)
 #Discrete(4)
@@ -12,7 +13,8 @@ env = wrappers.Monitor(env, '/tmp/frozenlake-experiment-4')
 #Discrete(16)
 
 qstates = np.zeros([env.observation_space.n,env.action_space.n]) # a 16x4 of zeros, each representing an action per state
-# eps = 0.2
+
+#hyperparamaters
 alpha = 0.01
 gamma = 1
 
@@ -30,13 +32,10 @@ for i_episode in range(num_episodes):
 		observation1, reward, done, info = env.step(action) #takes action
 		# print("observation",observation1)
 		# print("reward", reward)
+		altReward = reward
 		if done:
-			if reward != 0:
-				altReward = 1# Goal
-			else:
+			if reward == 0:
 				altReward = -2 # Dead
-		else:
-			altReward = 0 #living reward
 		qstates[observation,action] = (1-alpha)*qstates[observation,action] + alpha*(altReward+(gamma*np.max(qstates[observation1,:])) - qstates[observation,action])
 		observation = observation1
 		rAll += reward
@@ -48,3 +47,5 @@ for i_episode in range(num_episodes):
 env.close()
 print("Score over time:" + str(sum(rList)/num_episodes))
 print("score over last 100: ", sum(rList[-100:])/100)
+
+pickle.dump({"Qtable":qstates,"Reward_History":rList},open("savedRecord.p", "wb"))
